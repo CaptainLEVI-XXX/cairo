@@ -27,10 +27,10 @@ pub trait IPoolManager<TContractState> {
     fn preview_withdraw(self: @TContractState, vault_asset: ContractAddress, assets: u256) -> u256;
     fn preview_redeem(self: @TContractState, vault_asset: ContractAddress, assets: u256) -> u256;
 
-    fn total_supply(self: @TContractState, vault_asset: ContractAddress) -> u256;
     fn name(self: @TContractState, vault_asset: ContractAddress) -> felt252;
     fn symbol(self: @TContractState, vault_asset: ContractAddress) -> felt252;
-    fn decimals(self: @TContractState, vault_asset: ContractAddress) -> felt252;
+    fn decimals(self: @TContractState, vault_asset: ContractAddress) -> u8;
+
 
     fn deposit(
         ref self: TContractState,
