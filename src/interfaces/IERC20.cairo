@@ -24,5 +24,5 @@ pub trait IERC20<TContractState> {
     fn approve(ref self: TContractState, spender: ContractAddress, amount: u256) -> bool;
     fn permissioned_mint(ref self: TContractState, account: ContractAddress, amount: u256);
     fn permissioned_burn(ref self: TContractState, account: ContractAddress, amount: u256);
-    fn decimals(self:@TContractState)->u8;
+    fn decimals(self: @TContractState) -> u8;
 }
