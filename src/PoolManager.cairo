@@ -375,6 +375,8 @@ use super::{IPoolManager, TokenMetadata};
         assets: u256,
         receiver: ContractAddress
     ) -> u256 {
+
+        self.reentrancyguard.start();
         let shares = self.preview_deposit(tokenId, assets);
         assert(!shares.is_zero(), 'ZERO_SHARES');
 
@@ -398,6 +400,7 @@ use super::{IPoolManager, TokenMetadata};
         ));
 
         self.after_deposit(tokenId, assets, shares);
+        self.reentrancyguard.end();
         shares
     }
 
@@ -407,6 +410,8 @@ use super::{IPoolManager, TokenMetadata};
         shares: u256,
         receiver: ContractAddress
     ) -> u256 {
+
+        self.reentrancyguard.start();
         let assets = self.preview_mint(tokenId, shares);
         assert(!assets.is_zero(), 'Zero_ASSETs');
 
@@ -430,7 +435,9 @@ use super::{IPoolManager, TokenMetadata};
         ));
 
         self.after_deposit(tokenId, assets, shares);
+        self.reentrancyguard.end();
         assets
+        
     }
 
     fn redeem(
@@ -440,6 +447,7 @@ use super::{IPoolManager, TokenMetadata};
         receiver: ContractAddress,
         owner:ContractAddress
     ) -> u256 {
+        self.reentrancyguard.start();
         let assets = self.preview_redeem(tokenId, shares);
         assert(assets.is_zero(),'ZERO Assets');
         let caller = get_caller_address();
@@ -472,6 +480,8 @@ use super::{IPoolManager, TokenMetadata};
             }
         ));
 
+        self.reentrancyguard.end();
+
         assets
     }
 
@@ -482,6 +492,7 @@ use super::{IPoolManager, TokenMetadata};
         receiver: ContractAddress,
         owner: ContractAddress
     ) -> u256 {
+        self.reentrancyguard.start();
         let shares = self.preview_withdraw(tokenId, assets);
         let caller = get_caller_address();
 
@@ -512,6 +523,8 @@ use super::{IPoolManager, TokenMetadata};
                 shares
             }
         ));
+
+        self.reentrancyguard.end();
 
         shares
     }
@@ -624,6 +637,7 @@ use super::{IPoolManager, TokenMetadata};
         operator: ContractAddress,
         approved: bool
     ) -> bool {
+        self.reentrancyguard.start();
         let caller = get_caller_address();
         self.is_operator.write((caller, operator), approved);
         self.emit(Event::OperatorSet(OperatorSet {
@@ -631,6 +645,7 @@ use super::{IPoolManager, TokenMetadata};
             spender:operator,
             approved,
         }));
+        self.reentrancyguard.end();
         true
     }
 
