@@ -1,8 +1,9 @@
 pub mod interfaces {
-    pub mod IERC20;
-    pub mod IMultiToken;
-    pub mod ITokenMetadata;
-    pub mod IPoolManager;
+    pub mod iERC20;
+    pub mod iTokenMetadata;
+    pub mod iPoolManager;
+    pub mod iPoolManagerFactory;
 }
 
 pub mod PoolManager;
+pub mod PoolManagerFactory;
