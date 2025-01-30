@@ -1,2 +1,6 @@
 target
 .snfoundry_cache/
+node_modules
+.env.local
+.declare.ts
+.deploy.ts

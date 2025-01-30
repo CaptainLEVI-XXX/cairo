@@ -17,7 +17,7 @@ pub mod PoolManager {
     use starknet::storage::{Map, StorageMapReadAccess, StorageMapWriteAccess};
     use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess};
 
-    pub const max: u128 = 340282366920938463463374607431768211455;
+    pub const max: u128 = 340282366920938463463374607431768211;
 
     component!(path: UpgradeableComponent, storage: upgradeable, event: UpgradeableEvent);
     component!(
@@ -161,8 +161,6 @@ pub mod PoolManager {
         fn register_asset(
             ref self: ContractState, vault_asset: ContractAddress, name: felt252, symbol: felt252
         ) -> felt252 {
-            self._assert_invalid_calldata(vault_asset);
-            self._assert_vault_registred(vault_asset);
             assert(self.asset_to_tokenId.read(vault_asset) == 0, Error::AssetAlreadyRegistered);
 
             let erc20_dispatcher: IERC20Dispatcher = IERC20Dispatcher {
@@ -172,7 +170,7 @@ pub mod PoolManager {
             let total_supply = erc20_dispatcher.total_supply();
             let current_id: felt252 = self.next_tokenId.read();
 
-            let tokenId: felt252 = current_id + 1;
+            let tokenId: felt252 = current_id + 1.into();
             self.next_tokenId.write(tokenId);
             self.asset_to_tokenId.write(vault_asset, tokenId);
             self.tokenId_to_asset.write(tokenId, vault_asset);
@@ -516,15 +514,6 @@ pub mod PoolManager {
         fn _assert_owner(self: @ContractState) {
             assert(get_caller_address() == self.owner.read(), Error::UNAUTHORIZED);
         }
-
-        fn _assert_vault_registred(self: @ContractState, vault_asset: ContractAddress) {// let vaultMetadata:TokenMetadata = self.token_metadata.read(vault_asset);
-        // assert(!vaultMetadata.is_registered,Error::AssetAlreadyRegistered);
-        }
-
-        fn _assert_invalid_calldata(self: @ContractState, address: ContractAddress) {
-            assert(address.is_zero(), Error::InvalidCalldata);
-        }
-
         fn _transfer(
             ref self: ContractState,
             from: ContractAddress,

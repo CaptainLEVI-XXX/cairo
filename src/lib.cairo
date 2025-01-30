@@ -7,3 +7,4 @@ pub mod interfaces {
 
 pub mod PoolManager;
 pub mod PoolManagerFactory;
+pub mod MockERC20;
