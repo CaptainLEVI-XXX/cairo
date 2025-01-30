@@ -36,6 +36,7 @@ interface VaultDetailsProps {
 const VaultDetails: React.FC<VaultDetailsProps> = ({ vault }) => {
   const [investmentAmount, setInvestmentAmount] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedToken, setSelectedToken] = useState<string | null>(null);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -146,110 +147,103 @@ const VaultDetails: React.FC<VaultDetailsProps> = ({ vault }) => {
             </Card>
           </div>
 
-          {/* Network Allocation */}
-          <Card className="bg-zinc-800/50 border-zinc-700/50">
-            <CardHeader>
-              <CardTitle className="text-lg text-zinc-100">
-                Investment Allocation
-              </CardTitle>
-              <CardDescription className="text-zinc-400">
-                Current distribution across networks and protocols
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Network Distribution */}
-              <div>
-                <div className="text-sm font-medium text-zinc-100 mb-4">
-                  Network Distribution
-                </div>
-                <div className="space-y-4">
-                  {[
-                    {
-                      network: "Starknet",
-                      percentage: 45,
-                      color: "bg-indigo-500",
-                    },
-                    {
-                      network: "Ethereum",
-                      percentage: 30,
-                      color: "bg-blue-500",
-                    },
-                    {
-                      network: "Arbitrum",
-                      percentage: 15,
-                      color: "bg-purple-500",
-                    },
-                    {
-                      network: "Optimism",
-                      percentage: 10,
-                      color: "bg-red-500",
-                    },
-                  ].map((item) => (
-                    <div key={item.network} className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-zinc-300">{item.network}</span>
-                        <span className="text-zinc-400">
-                          {item.percentage}%
-                        </span>
+          {/* Replace the Protocol Distribution section with this simpler token distribution */}
+          <div>
+            <div className="text-sm font-medium text-zinc-100 mb-4">
+              Current Token Distribution
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {[
+                {
+                  symbol: "ETH",
+                  amount: "450",
+                  value: "1,200,000",
+                  color: "from-blue-500 to-blue-600",
+                },
+                {
+                  symbol: "USDC",
+                  amount: "750,000",
+                  value: "750,000",
+                  color: "from-blue-400 to-cyan-500",
+                },
+                {
+                  symbol: "STRK",
+                  amount: "25,000",
+                  value: "500,000",
+                  color: "from-purple-500 to-purple-600",
+                },
+                {
+                  symbol: "USDT",
+                  amount: "500,000",
+                  value: "500,000",
+                  color: "from-green-500 to-teal-500",
+                },
+              ].map((token) => (
+                <div
+                  key={token.symbol}
+                  className="bg-zinc-900/50 rounded-lg p-4"
+                >
+                  <div className="flex items-center justify-between border-b border-zinc-800 pb-3 mb-3">
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={`w-8 h-8 rounded-full bg-gradient-to-r ${token.color} flex items-center justify-center text-white font-semibold text-sm`}
+                      >
+                        {token.symbol.slice(0, 1)}
                       </div>
-                      <div className="h-2 bg-zinc-700 rounded-full overflow-hidden">
-                        <div
-                          className={`h-full ${item.color} transition-all duration-300`}
-                          style={{ width: `${item.percentage}%` }}
-                        />
+                      <div className="text-zinc-200 font-medium">
+                        {token.symbol}
                       </div>
                     </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Protocol Distribution */}
-              <div>
-                <div className="text-sm font-medium text-zinc-100 mb-4">
-                  Protocol Distribution
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {[
-                    { protocol: "MakerDAO", amount: "2.5M", percentage: 25 },
-                    { protocol: "Aave", amount: "2M", percentage: 20 },
-                    { protocol: "Curve", amount: "1.5M", percentage: 15 },
-                    { protocol: "Lido", amount: "1.5M", percentage: 15 },
-                    { protocol: "Uniswap", amount: "1M", percentage: 10 },
-                    { protocol: "Others", amount: "1.5M", percentage: 15 },
-                  ].map((item) => (
                     <div
-                      key={item.protocol}
-                      className="bg-zinc-900/50 rounded-lg p-3 flex items-center justify-between"
+                      className={`text-sm bg-gradient-to-r ${token.color} bg-clip-text text-transparent font-medium`}
                     >
-                      <div>
-                        <div className="text-zinc-200 font-medium">
-                          {item.protocol}
-                        </div>
-                        <div className="text-sm text-zinc-400">
-                          {item.percentage}%
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-zinc-300">{item.amount}</div>
-                        <div className="text-xs text-zinc-500">TVL</div>
-                      </div>
+                      ${token.value}
                     </div>
-                  ))}
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-zinc-400 text-sm">Amount Locked</span>
+                    <span className="text-zinc-300 font-medium">
+                      {token.amount} {token.symbol}
+                    </span>
+                  </div>
                 </div>
-              </div>
+              ))}
+            </div>
 
-              {/* Auto-Rebalancing Info */}
-              <Alert className="bg-zinc-900/50 border-teal-500/20">
-                <AlertDescription className="text-zinc-400 flex items-start gap-2">
-                  <Activity className="w-4 h-4 text-teal-400 mt-0.5" />
-                  <span>
-                    Portfolio is automatically rebalanced to maintain optimal
-                    risk-adjusted returns across networks and protocols.
-                  </span>
-                </AlertDescription>
-              </Alert>
-            </CardContent>
-          </Card>
+            {/* Accepted Tokens Section */}
+            <div className="mt-6 p-4 bg-zinc-900/50 rounded-lg">
+              <div className="text-sm font-medium text-zinc-100 mb-3">
+                Accepted Tokens for Deposit
+              </div>
+              <div className="flex flex-wrap gap-3">
+                {["ETH", "USDC", "USDT", "STRK"].map((token) => (
+                  <div
+                    key={token}
+                    className="px-3 py-1.5 bg-zinc-800 rounded-full flex items-center gap-2"
+                  >
+                    <div className="w-2 h-2 rounded-full bg-teal-400"></div>
+                    <span className="text-zinc-300 text-sm">{token}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-3 text-sm text-zinc-400">
+                Deposit any of these tokens - we will convert them to rTokens
+                based on the vaults strategy
+              </div>
+            </div>
+
+            {/* Auto-Conversion Info */}
+            <Alert className="mt-6 bg-zinc-900/50 border-teal-500/20">
+              <AlertDescription className="text-zinc-400 flex items-start gap-2">
+                <Activity className="w-4 h-4 text-teal-400 mt-0.5" />
+                <span>
+                  All deposited tokens are automatically converted to rTokens at
+                  the current exchange rate. The vault manages the token
+                  distribution to maintain optimal risk-adjusted returns.
+                </span>
+              </AlertDescription>
+            </Alert>
+          </div>
 
           {/* Investment Section */}
           <Card className="bg-zinc-800/50 border-zinc-700/50">
@@ -258,45 +252,99 @@ const VaultDetails: React.FC<VaultDetailsProps> = ({ vault }) => {
                 Invest in Vault
               </CardTitle>
               <CardDescription className="text-zinc-400">
-                Enter the amount you want to invest
+                Select token and enter the amount you want to invest
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div>
-                <div className="relative">
-                  <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 w-4 h-4" />
-                  <Input
-                    type="number"
-                    placeholder="Enter investment amount"
-                    value={investmentAmount}
-                    onChange={(e: {
-                      target: { value: React.SetStateAction<string> };
-                    }) => setInvestmentAmount(e.target.value)}
-                    className="pl-10 bg-zinc-900/50 border-zinc-700/50 text-zinc-100 placeholder:text-zinc-500"
-                  />
+              {/* Token Selection */}
+              <div className="space-y-3">
+                <label className="text-sm text-zinc-400">Select Token</label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {[
+                    { symbol: "ETH", color: "from-blue-500 to-blue-600" },
+                    { symbol: "USDC", color: "from-blue-400 to-cyan-500" },
+                    { symbol: "STRK", color: "from-purple-500 to-purple-600" },
+                    { symbol: "USDT", color: "from-green-500 to-teal-500" },
+                  ].map((token) => (
+                    <button
+                      key={token.symbol}
+                      onClick={() => setSelectedToken(token.symbol)}
+                      className={`
+              p-3 rounded-lg border transition-all duration-200
+              ${
+                selectedToken === token.symbol
+                  ? "bg-zinc-700/50 border-teal-500/50"
+                  : "bg-zinc-900/50 border-zinc-700/50 hover:border-zinc-600"
+              }
+            `}
+                    >
+                      <div className="flex items-center gap-2">
+                        <div
+                          className={`w-8 h-8 rounded-full bg-gradient-to-r ${token.color} flex items-center justify-center text-white font-semibold text-sm`}
+                        >
+                          {token.symbol.slice(0, 1)}
+                        </div>
+                        <span className="text-zinc-100 font-medium">
+                          {token.symbol}
+                        </span>
+                      </div>
+                    </button>
+                  ))}
                 </div>
               </div>
 
-              {investmentAmount && parseFloat(investmentAmount) > 0 && (
-                <div className="space-y-4">
-                  <div className="p-4 rounded-lg bg-zinc-900/50 space-y-3">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-zinc-400">
-                        Expected Monthly Returns
-                      </span>
-                      <span className="text-teal-400">
-                        {formatCurrency(returns.monthly)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-zinc-400">
-                        Expected Annual Returns
-                      </span>
-                      <span className="text-teal-400">
-                        {formatCurrency(returns.annual)}
-                      </span>
+              {/* Amount Input - Only shown after token is selected */}
+              {selectedToken && (
+                <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
+                  <div>
+                    <div className="relative">
+                      <Input
+                        type="number"
+                        placeholder={`Enter ${selectedToken} amount`}
+                        value={investmentAmount}
+                        onChange={(e) => setInvestmentAmount(e.target.value)}
+                        className="pl-10 bg-zinc-900/50 border-zinc-700/50 text-zinc-100 placeholder:text-zinc-500"
+                      />
+                      <div className="absolute left-3 top-1/2 -translate-y-1/2">
+                        <div
+                          className={`w-4 h-4 rounded-full bg-gradient-to-r ${
+                            selectedToken === "ETH"
+                              ? "from-blue-500 to-blue-600"
+                              : selectedToken === "USDC"
+                              ? "from-blue-400 to-cyan-500"
+                              : selectedToken === "STRK"
+                              ? "from-purple-500 to-purple-600"
+                              : "from-green-500 to-teal-500"
+                          } flex items-center justify-center text-white font-semibold text-[10px]`}
+                        >
+                          {selectedToken?.slice(0, 1)}
+                        </div>
+                      </div>
                     </div>
                   </div>
+
+                  {investmentAmount && parseFloat(investmentAmount) > 0 && (
+                    <div className="space-y-4">
+                      <div className="p-4 rounded-lg bg-zinc-900/50 space-y-3">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-zinc-400">
+                            Expected Monthly Returns
+                          </span>
+                          <span className="text-teal-400">
+                            {formatCurrency(returns.monthly)}
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-zinc-400">
+                            Expected Annual Returns
+                          </span>
+                          <span className="text-teal-400">
+                            {formatCurrency(returns.annual)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </CardContent>
@@ -304,6 +352,7 @@ const VaultDetails: React.FC<VaultDetailsProps> = ({ vault }) => {
               <Button
                 onClick={handleInvest}
                 disabled={
+                  !selectedToken ||
                   !investmentAmount ||
                   parseFloat(investmentAmount) <= 0 ||
                   isLoading
@@ -316,7 +365,7 @@ const VaultDetails: React.FC<VaultDetailsProps> = ({ vault }) => {
                     Processing...
                   </div>
                 ) : (
-                  "Invest Now"
+                  `Invest with ${selectedToken || "Token"}`
                 )}
               </Button>
             </CardFooter>

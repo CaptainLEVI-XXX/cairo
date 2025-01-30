@@ -262,31 +262,37 @@ const StepIndicator: React.FC<StepIndicatorProps> = ({
 
   return (
     <div className="relative w-full max-w-md mx-auto mb-12">
-      <div className="relative flex items-center justify-center gap-16">
-        {/* Back Button */}
-        {showBackButton && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onBack}
-            className="absolute -left-16 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-teal-400"
-          >
-            <ChevronLeft className="w-5 h-5" />
-            <span className="sr-only">Go back</span>
-          </Button>
-        )}
+      {/* Back Button */}
+      {showBackButton && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onBack}
+          className="absolute -left-16 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-teal-400"
+        >
+          <ChevronLeft className="w-5 h-5" />
+          <span className="sr-only">Go back</span>
+        </Button>
+      )}
 
-        {/* Step Indicators */}
-        {steps.map((step, index) => (
-          <React.Fragment key={step.id}>
+      {/* Container for dots and line */}
+      <div className="relative flex items-center justify-center">
+        {/* Connecting Line - Goes behind the dots */}
+        <div className="absolute w-32 h-[2px] bg-zinc-800"></div>
+
+        {/* Dots Container */}
+        <div className="relative flex items-center justify-between w-32">
+          {steps.map((step, index) => (
             <button
+              key={step.id}
               onClick={() =>
                 step.canNavigate && onStepClick(step.id as "strategy" | "vault")
               }
               disabled={!step.canNavigate}
-              className="relative focus:outline-none group"
+              className="relative focus:outline-none group z-10"
               aria-label={`Step ${index + 1}`}
             >
+              {/* Dot */}
               <div
                 className={`
                   w-4 h-4 rounded-full transition-all duration-300
@@ -306,18 +312,6 @@ const StepIndicator: React.FC<StepIndicatorProps> = ({
                 `}
               />
 
-              {/* Progress Line */}
-              {index < steps.length - 1 && (
-                <div className="absolute left-[50%] w-[calc(100%_+_4rem)] h-[2px]">
-                  <div
-                    className={`
-                      absolute top-[7px] left-0 w-full h-full transition-colors duration-300
-                      ${step.isCompleted ? "bg-teal-500" : "bg-zinc-700"}
-                    `}
-                  />
-                </div>
-              )}
-
               {/* Tooltip */}
               {step.canNavigate && !step.isActive && (
                 <div className="absolute top-8 left-1/2 -translate-x-1/2 scale-0 group-hover:scale-100 transition-transform duration-200">
@@ -327,8 +321,16 @@ const StepIndicator: React.FC<StepIndicatorProps> = ({
                 </div>
               )}
             </button>
-          </React.Fragment>
-        ))}
+          ))}
+
+          {/* Progress overlay - Shows completion */}
+          <div
+            className="absolute left-0 h-[2px] bg-teal-500 transition-all duration-300"
+            style={{
+              width: hasStrategy ? "100%" : "0%",
+            }}
+          />
+        </div>
       </div>
     </div>
   );
