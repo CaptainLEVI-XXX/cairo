@@ -3,16 +3,18 @@
 pub mod PoolManager {
     use starknet::event::EventEmitter;
     use cairo::interfaces::iPoolManager::{IPoolManager, TokenMetadata};
-    use core::traits::Into;
+    use core::traits::{Into,TryInto};
     use core::num::traits::Zero;
     use starknet::{
         get_caller_address, ContractAddress, ClassHash, contract_address_const, get_contract_address
     };
     use openzeppelin::{
         security::reentrancyguard::ReentrancyGuardComponent,
+        security::pausable::PausableComponent,
         upgrades::upgradeable::UpgradeableComponent, introspection::src5::SRC5Component,
     };
     use cairo::interfaces::iERC20::{IERC20Dispatcher, IERC20DispatcherTrait};
+ 
 
     use starknet::storage::{Map, StorageMapReadAccess, StorageMapWriteAccess};
     use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess};
@@ -24,9 +26,11 @@ pub mod PoolManager {
         path: ReentrancyGuardComponent, storage: reentrancyguard, event: ReentracnyGuardEvent,
     );
     component!(path: SRC5Component, storage: src5, event: SRC5Event);
+    component!(path: PausableComponent, storage: pausable, event: PausableEvent);
 
     impl UpgradeableInternalImpl = UpgradeableComponent::InternalImpl<ContractState>;
     impl ReentrantInternalImpl = ReentrancyGuardComponent::InternalImpl<ContractState>;
+    impl PausableInternalImpl = PausableComponent::InternalImpl<ContractState>;
 
     #[storage]
     pub struct Storage {
@@ -36,6 +40,8 @@ pub mod PoolManager {
         reentrancyguard: ReentrancyGuardComponent::Storage,
         #[substorage(v0)]
         src5: SRC5Component::Storage,
+        #[substorage(v0)]
+        pausable: PausableComponent::Storage,
         balance_of: Map<(ContractAddress, felt252), u256>,
         allowances: Map<(ContractAddress, ContractAddress, felt252), u256>,
         is_operator: Map<(ContractAddress, ContractAddress), bool>,
@@ -44,9 +50,8 @@ pub mod PoolManager {
         asset_to_tokenId: Map<ContractAddress, felt252>,
         tokenId_to_asset: Map<felt252, ContractAddress>,
         token_metadata: Map<felt252, TokenMetadata>,
-        next_tokenId: felt252
+        next_tokenId: felt252,
     }
-
 
     #[event]
     #[derive(Drop, starknet::Event)]
@@ -63,6 +68,8 @@ pub mod PoolManager {
         ReentracnyGuardEvent: ReentrancyGuardComponent::Event,
         #[flat]
         SRC5Event: SRC5Component::Event,
+        #[flat]
+        PausableEvent: PausableComponent::Event
     }
 
 
@@ -144,6 +151,7 @@ pub mod PoolManager {
         pub const InsufficientAllowance: felt252 = 'InsufficientAllowance';
         pub const InvalidAsset: felt252 = 'InvalidAsset';
         pub const InvalidCalldata: felt252 = 'Invalid Calldata';
+        pub const PoolIsPaused: felt252 = 'PoolIsPaused';
     }
 
 
@@ -237,6 +245,7 @@ pub mod PoolManager {
         fn deposit(
             ref self: ContractState, tokenId: felt252, assets: u256, receiver: ContractAddress
         ) -> u256 {
+            self.pausable.assert_not_paused();
             self.reentrancyguard.start();
             let shares = self.preview_deposit(tokenId, assets);
             assert(!shares.is_zero(), 'ZERO_SHARES');
@@ -263,6 +272,7 @@ pub mod PoolManager {
         fn mint(
             ref self: ContractState, tokenId: felt252, shares: u256, receiver: ContractAddress
         ) -> u256 {
+            self.pausable.assert_not_paused();
             self.reentrancyguard.start();
             let assets = self.preview_mint(tokenId, shares);
             assert(!assets.is_zero(), 'Zero_ASSETs');
@@ -293,6 +303,7 @@ pub mod PoolManager {
             receiver: ContractAddress,
             owner: ContractAddress
         ) -> u256 {
+            self.pausable.assert_not_paused();
             self.reentrancyguard.start();
             let assets = self.preview_redeem(tokenId, shares);
             assert(assets.is_zero(), 'ZERO Assets');
@@ -330,6 +341,7 @@ pub mod PoolManager {
             receiver: ContractAddress,
             owner: ContractAddress
         ) -> u256 {
+            self.pausable.assert_not_paused();
             self.reentrancyguard.start();
             let shares = self.preview_withdraw(tokenId, assets);
             let caller = get_caller_address();
@@ -442,6 +454,7 @@ pub mod PoolManager {
         fn set_operator(
             ref self: ContractState, operator: ContractAddress, approved: bool
         ) -> bool {
+            self.pausable.assert_not_paused();
             self.reentrancyguard.start();
             let caller = get_caller_address();
             self.is_operator.write((caller, operator), approved);
@@ -506,6 +519,61 @@ pub mod PoolManager {
         fn balance_of(self: @ContractState, owner: ContractAddress, id: felt252) -> u256 {
             self.balance_of.read((owner, id))
         }
+
+        fn pause(ref self : ContractState){
+            self._assert_owner();
+            self.pausable.pause();
+        }
+
+        fn unpause(ref self : ContractState){
+            self._assert_owner();
+            self.pausable.unpause();
+        }
+
+        fn transfer_assets_to_strategy(ref self: ContractState){
+            self._assert_owner();  // replace this strategy address
+            self.pausable.assert_not_paused();
+            self.reentrancyguard.start();
+        
+            let total_tokens:u8 = self.next_tokenId.read().try_into().unwrap();
+            let strategy_address = get_caller_address();
+        
+            // Loop through all token IDs (starting from 1 since 0 is not used)
+            let mut current_id: u8 = 1;
+            loop {
+                if current_id > total_tokens {
+                    break;
+                }
+        
+                // Get the underlying asset address for this token ID
+                let asset_address:ContractAddress = self.tokenId_to_asset.read(current_id.try_into().unwrap());
+                
+                // Skip if no asset registered for this ID
+                if asset_address.is_zero() {
+                    current_id += 1;
+                    continue;
+                }
+        
+                let erc20_dispatcher = IERC20Dispatcher { contract_address: asset_address };
+                
+                // Get total assets in vault for this token
+                let vault_balance = erc20_dispatcher.balance_of(get_contract_address());
+                
+                // Calculate 80% of balance (using basis points: 8000 = 80%)
+                let transfer_amount = (vault_balance * 8000_u256) / 10000_u256;
+                
+                // Only transfer if there's a non-zero amount
+                if !transfer_amount.is_zero() {
+                    // Transfer 80% to strategy
+                    erc20_dispatcher.transfer(strategy_address, transfer_amount);
+                }
+        
+                current_id += 1;
+            };
+        
+            self.reentrancyguard.end();
+        }   
+
     }
 
 
@@ -514,6 +582,7 @@ pub mod PoolManager {
         fn _assert_owner(self: @ContractState) {
             assert(get_caller_address() == self.owner.read(), Error::UNAUTHORIZED);
         }
+
         fn _transfer(
             ref self: ContractState,
             from: ContractAddress,
