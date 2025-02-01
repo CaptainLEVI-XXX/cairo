@@ -322,7 +322,7 @@ pub trait IPoolManager<TContractState> {
 
     fn pause(ref self:TContractState);
     fn unpause(ref self:TContractState);
-    fn transfer_assets_to_strategy(ref self:TContractState);
+    fn transfer_assets_to_strategy(ref self:TContractState,requested_address:ContractAddress);
 }
 
 /// Struct representing metadata for a token managed by the Pool Manager.

@@ -530,13 +530,12 @@ pub mod PoolManager {
             self.pausable.unpause();
         }
 
-        fn transfer_assets_to_strategy(ref self: ContractState){
+        fn transfer_assets_to_strategy(ref self: ContractState,requested_address:ContractAddress){
             self._assert_owner();  // replace this strategy address
             self.pausable.assert_not_paused();
             self.reentrancyguard.start();
         
             let total_tokens:u8 = self.next_tokenId.read().try_into().unwrap();
-            let strategy_address = get_caller_address();
         
             // Loop through all token IDs (starting from 1 since 0 is not used)
             let mut current_id: u8 = 1;
@@ -565,7 +564,7 @@ pub mod PoolManager {
                 // Only transfer if there's a non-zero amount
                 if !transfer_amount.is_zero() {
                     // Transfer 80% to strategy
-                    erc20_dispatcher.transfer(strategy_address, transfer_amount);
+                    erc20_dispatcher.transfer(requested_address, transfer_amount);
                 }
         
                 current_id += 1;
