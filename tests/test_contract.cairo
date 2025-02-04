@@ -67,65 +67,65 @@ fn test_register_asset() {
     stop_cheat_caller_address(pool_manager_address);
 }
 
-// #[test]
-// fn test_deposit_and_withdraw() {
-//     let (pool_manager_address, token_address) = setup();
-//     let pool_manager = IPoolManagerDispatcher { contract_address: pool_manager_address };
-//     let admin: ContractAddress = contract_address_const::<1>();
-//     let user: ContractAddress = contract_address_const::<2>();
+#[test]
+fn test_deposit_and_withdraw() {
+    let (pool_manager_address, token_address) = setup();
+    let pool_manager = IPoolManagerDispatcher { contract_address: pool_manager_address };
+    let admin: ContractAddress = contract_address_const::<1>();
+    let user: ContractAddress = contract_address_const::<2>();
 
-//     // Register asset
-//     start_cheat_caller_address(pool_manager_address, admin);
-//     let token_id = pool_manager.register_asset(token_address, 'Test Pool Token', 'TPT');
-//     stop_cheat_caller_address(pool_manager_address);
+    // Register asset
+    start_cheat_caller_address(pool_manager_address, admin);
+    let token_id = pool_manager.register_asset(token_address, 'Test Pool Token', 'TPT');
+    stop_cheat_caller_address(pool_manager_address);
 
-//     // Setup token approvals and transfers
-//     let deposit_amount: u256 = 100000000000000000000; // 100 tokens
-//     let token = IERC20Dispatcher { contract_address: token_address };
+    // Setup token approvals and transfers
+    let deposit_amount: u256 = 100000000000000000000; // 100 tokens
+    let token = IERC20Dispatcher { contract_address: token_address };
     
-//     // Transfer some tokens to user
-//     start_cheat_caller_address(token_address, admin);
-//     token.transfer(user, deposit_amount);
-//     stop_cheat_caller_address(token_address);
+    // Transfer some tokens to user
+    start_cheat_caller_address(token_address, admin);
+    token.transfer(user, deposit_amount);
+    stop_cheat_caller_address(token_address);
 
-//     // Approve pool manager to spend tokens
-//     start_cheat_caller_address(token_address, user);
-//     token.approve(pool_manager_address, deposit_amount);
+    // Approve pool manager to spend tokens
+    start_cheat_caller_address(token_address, user);
+    token.approve(pool_manager_address, deposit_amount);
     
-//     // Test deposit
-//     let shares = pool_manager.deposit(token_id, deposit_amount, user);
-//     assert(shares == deposit_amount, 'Invalid shares received');
-//     assert(pool_manager.balance_of(user, token_id) == shares, 'Invalid balance after deposit');
+    // Test deposit
+    let shares = pool_manager.deposit(token_id, deposit_amount, user);
+    assert(shares == deposit_amount, 'Invalid shares received');
+    assert(pool_manager.balance_of(user, token_id) == shares, 'Invalid balance after deposit');
     
-//     // Test withdraw
-//     let withdraw_amount = deposit_amount / 2;
-//     let shares_to_burn = pool_manager.withdraw(token_id, withdraw_amount, user, user);
+    // Test withdraw
+    let withdraw_amount = deposit_amount / 2;
+    let shares_to_burn = pool_manager.withdraw(token_id, withdraw_amount, user, user);
     
-//     assert(pool_manager.balance_of(user, token_id) == deposit_amount - shares_to_burn, 'Invalid balance after withdraw');
-//     assert(token.balance_of(user) == withdraw_amount, 'Invalid token balance after withdraw');
+    assert(pool_manager.balance_of(user, token_id) == deposit_amount - shares_to_burn, 'Invalid balance after withdraw');
+    assert(token.balance_of(user) == withdraw_amount, 'Invalid token balance after withdraw');
     
-//     stop_cheat_caller_address(token_address);
-// }
+    stop_cheat_caller_address(token_address);
+}
 
-// #[test]
-// fn test_preview_deposit_and_withdraw() {
-//     let (pool_manager_address, token_address) = setup();
-//     let pool_manager = IPoolManagerDispatcher { contract_address: pool_manager_address };
-//     let admin: ContractAddress = contract_address_const::<1>();
+#[test]
+fn test_preview_deposit_and_withdraw() {
+    let (pool_manager_address, token_address) = setup();
+    let pool_manager = IPoolManagerDispatcher { contract_address: pool_manager_address };
+    let admin: ContractAddress = contract_address_const::<1>();
 
-//     // Register asset
-//     start_cheat_caller_address(pool_manager_address, admin);
-//     let token_id = pool_manager.register_asset(token_address, 'Test Pool Token', 'TPT');
-//     stop_cheat_caller_address(pool_manager_address);
+    // Register asset
+    start_cheat_caller_address(pool_manager_address, admin);
+    let token_id = pool_manager.register_asset(token_address, 'Test Pool Token', 'TPT');
+    stop_cheat_caller_address(pool_manager_address);
 
-//     let deposit_amount: u256 = 100000000000000000000; // 100 tokens
+    let deposit_amount: u256 = 100000000000000000000; // 100 tokens
     
-//     // Test preview deposit
-//     let expected_shares = pool_manager.preview_deposit(token_id, deposit_amount);
-//     assert(expected_shares == deposit_amount, 'Invalid preview deposit amount');
+    // Test preview deposit
+    let expected_shares = pool_manager.preview_deposit(token_id, deposit_amount);
+    assert(expected_shares == deposit_amount, 'Invalid preview deposit amount');
 
-//     // Test preview withdraw
-//     let withdraw_amount = deposit_amount / 2;
-//     let expected_shares_to_burn = pool_manager.preview_withdraw(token_id, withdraw_amount);
-//     assert(expected_shares_to_burn == withdraw_amount, 'Invalid preview withdraw amount');
-// }
+    // Test preview withdraw
+    let withdraw_amount = deposit_amount / 2;
+    let expected_shares_to_burn = pool_manager.preview_withdraw(token_id, withdraw_amount);
+    assert(expected_shares_to_burn == withdraw_amount, 'Invalid preview withdraw amount');
+}
