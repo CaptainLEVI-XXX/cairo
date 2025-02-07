@@ -1,13 +1,13 @@
 use starknet::ContractAddress;
 
 #[starknet::interface]
-pub trait IHashToken<TContractState> {
+pub trait IERC20Token<TContractState> {
     fn permissioned_mint(ref self: TContractState, account: ContractAddress, amount: u256);
     fn permissioned_burn(ref self: TContractState, account: ContractAddress, amount: u256);
 }
 
 #[starknet::interface]
-pub trait IHashTokenCamel<TContractState> {
+pub trait IERC20TokenCamel<TContractState> {
     fn permissionedMint(ref self: TContractState, account: ContractAddress, amount: u256);
     fn permissionedBurn(ref self: TContractState, account: ContractAddress, amount: u256);
 }

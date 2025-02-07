@@ -3,7 +3,7 @@
 pub mod MockERC20 {
     use starknet::{ContractAddress};
     use openzeppelin::token::erc20::{ERC20Component, ERC20HooksEmptyImpl};
-    use cairo::interfaces::iERC20::{IHashToken, IHashTokenCamel};
+    use cairo::interfaces::iERC20::{IERC20Token, IERC20TokenCamel};
 
     component!(path: ERC20Component, storage: erc20, event: ERC20Event);
 
@@ -33,7 +33,7 @@ pub mod MockERC20 {
     }
 
     #[abi(embed_v0)]
-    impl HashTokenImpl of IHashToken<ContractState> {
+    impl HashTokenImpl of IERC20Token<ContractState> {
         fn permissioned_mint(ref self: ContractState, account: ContractAddress, amount: u256) {
             self.erc20.mint(account, amount);
         }
@@ -43,7 +43,7 @@ pub mod MockERC20 {
     }
 
     #[abi(embed_v0)]
-    impl HashTokenCamelImpl of IHashTokenCamel<ContractState> {
+    impl HashTokenCamelImpl of IERC20TokenCamel<ContractState> {
         fn permissionedMint(ref self: ContractState, account: ContractAddress, amount: u256) {
             HashTokenImpl::permissioned_mint(ref self, account, amount)
         }
