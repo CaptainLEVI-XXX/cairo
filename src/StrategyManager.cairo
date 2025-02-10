@@ -53,7 +53,8 @@ pub mod StrategyManager {
         total_registered_strategies: u256,
         elizia: ContractAddress,
         owner: ContractAddress,
-        next_pool_id:u256
+        next_pool_id:u256,
+        jediswap_router:ContractAddress
     }
 
     #[event]
@@ -231,14 +232,17 @@ pub mod StrategyManager {
         fn request_funds_from_pool(ref self: ContractState,pool_id:felt252,strategy_id:felt252){
             let pool_address:ContractAddress =  self.pool_info(felt252);
             assert(!pool_address.is_zero(), Errors::STRATEGY_NOT_FOUND);
-            
-            let strategy_info:StrategyInfo = self.strategy_info.read(strategy_id);
-            
-
+            _assert_only_elizia();
+            _assert_strategy_exist(strategy_id);
+            let strategy_info = self.strategy_info.read(strategy_id);
+            let selector: felt252 = strategy_info.deposit_selector;
             let pool_dispatcher:IPoolDispatcher = IPoolDispatcher{
                 contract_address:pool_address
             };
             pool_dispatcher.transfer_assets_to_strategy(strategy_info.address);
+
+            self._swap
+
         }
     }
 
@@ -249,5 +253,59 @@ pub mod StrategyManager {
             let caller = get_caller_address();
             assert(caller == self.owner.read(), Errors::UNAUTHORIZED);
         }
+
+        fn _assert_only_elizia(self: @ContractState) {
+            let caller = get_caller_address();
+            assert(caller == self.elizia.read(), Errors::UNAUTHORIZED);
+        }
+
+        fn _assert_strategy_exist(self:@ContractState, strategy_id:felt252){
+            let strategy_info = self.strategy_info.read(strategy_id);
+            assert(strategy_info.is_registered, Errors::UNAUTHORIZED);
+        }
+
+        // fn _selector_for_action_type(self:@ContractState,strategy_id:felt252, action_type:u8)->felt252{
+        //     let strategy_info = self.strategy_info.read(strategy_id);
+        //     let result:felt252; 
+        //     if action_type == 0.into() result = strategy_info.deposit_selector;
+        //     else if action_type ==1.into() result =strategy_info.withdraw_selector;
+        //     else result = 0.into();
+        //     assert(result!= 0.into(),Errors::UNAUTHORIZED);
+
+        // }
+
+        fn _execute_swap(ref self ContractState)
+
+        fn _jedi_swap(
+            ref self: ContractState,
+            asset_from: ContractAddress,
+            asset_to: ContractAddress,
+            amount_in: u256,
+            routerAddr: ContractAddress
+        ) -> u256 {
+            if (asset_from == asset_to) {
+                return (amount_in);
+            }
+
+            let contract_address = get_contract_address();
+            let block_timestamp = get_block_timestamp();
+            let deadline = block_timestamp + 100;
+            assert(!routerAddr.is_zero(), 'jedi router 0');
+
+            let mut path: Array<ContractAddress> = array![];
+            path.append(asset_from);
+            path.append(asset_to);
+
+            let erc20_dispatcher :IERC20Dispatcher = IERC20Dispatcher{contract_address :asset_from };
+
+            erc20_dispatcher.approve(routerAddr, amount_in);
+
+            // change this to use the above.
+            let router = self._get_jedi_router();
+            let amounts = router
+                .swap_exact_tokens_for_tokens(amount_in, 0, path, contract_address, deadline);
+            return (*amounts.at(amounts.len() - 1));
+        }
+
     }
 }
