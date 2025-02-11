@@ -14,7 +14,7 @@ import {
   ChevronLeft,
   BarChart3,
 } from "lucide-react";
-
+import Wallet from "../Wallet/Wallet";
 import { Button } from "@/components/ui/button";
 import VaultDetails from "./VaultDetails";
 
@@ -109,11 +109,14 @@ const DeFiPlatform = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0b0f] bg-gradient-to-b from-zinc-950 to-zinc-900">
+    <div className="min-h-screen w-full bg-[#0a0b0f] bg-gradient-to-b from-zinc-950 to-zinc-900">
+      <div className="z-50 p-4 flex fixed top-4 right-4">
+        <Wallet />
+      </div>
       <div className="container mx-auto p-4 max-w-7xl">
         <div className="mb-12 text-center pt-8">
           <h1 className="text-4xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-teal-200 to-teal-400">
-            DeFi Mutual Funds Platform
+            STRKTropy
           </h1>
           <p className="text-zinc-400 text-lg">
             AI-powered cryptocurrency investment vaults

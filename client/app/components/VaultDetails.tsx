@@ -1,14 +1,11 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Card,
   CardHeader,
   CardTitle,
   CardDescription,
   CardContent,
-  CardFooter,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Coins,
   DollarSign,
@@ -19,6 +16,7 @@ import {
   Wallet,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import TokenSection from "./TokenSection";
 
 interface VaultDetailsProps {
   vault: {
@@ -34,10 +32,6 @@ interface VaultDetailsProps {
 }
 
 const VaultDetails: React.FC<VaultDetailsProps> = ({ vault }) => {
-  const [investmentAmount, setInvestmentAmount] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [selectedToken, setSelectedToken] = useState<string | null>(null);
-
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -47,32 +41,19 @@ const VaultDetails: React.FC<VaultDetailsProps> = ({ vault }) => {
     }).format(value);
   };
 
-  const handleInvest = async () => {
-    setIsLoading(true);
+  const handleInvest = async (amount: string, token: string) => {
     try {
       // Add your investment logic here
       await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulated delay
       console.log("Investment processed:", {
         vaultId: vault.id,
-        amount: investmentAmount,
+        amount,
+        token,
       });
     } catch (error) {
       console.error("Investment failed:", error);
-    } finally {
-      setIsLoading(false);
     }
   };
-
-  const calculateExpectedReturns = (amount: string) => {
-    const principal = parseFloat(amount) || 0;
-    const annualReturn = (principal * vault.apy) / 100;
-    return {
-      monthly: annualReturn / 12,
-      annual: annualReturn,
-    };
-  };
-
-  const returns = calculateExpectedReturns(investmentAmount);
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -246,130 +227,7 @@ const VaultDetails: React.FC<VaultDetailsProps> = ({ vault }) => {
           </div>
 
           {/* Investment Section */}
-          <Card className="bg-zinc-800/50 border-zinc-700/50">
-            <CardHeader>
-              <CardTitle className="text-lg text-zinc-100">
-                Invest in Vault
-              </CardTitle>
-              <CardDescription className="text-zinc-400">
-                Select token and enter the amount you want to invest
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Token Selection */}
-              <div className="space-y-3">
-                <label className="text-sm text-zinc-400">Select Token</label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  {[
-                    { symbol: "ETH", color: "from-blue-500 to-blue-600" },
-                    { symbol: "USDC", color: "from-blue-400 to-cyan-500" },
-                    { symbol: "STRK", color: "from-purple-500 to-purple-600" },
-                    { symbol: "USDT", color: "from-green-500 to-teal-500" },
-                  ].map((token) => (
-                    <button
-                      key={token.symbol}
-                      onClick={() => setSelectedToken(token.symbol)}
-                      className={`
-              p-3 rounded-lg border transition-all duration-200
-              ${
-                selectedToken === token.symbol
-                  ? "bg-zinc-700/50 border-teal-500/50"
-                  : "bg-zinc-900/50 border-zinc-700/50 hover:border-zinc-600"
-              }
-            `}
-                    >
-                      <div className="flex items-center gap-2">
-                        <div
-                          className={`w-8 h-8 rounded-full bg-gradient-to-r ${token.color} flex items-center justify-center text-white font-semibold text-sm`}
-                        >
-                          {token.symbol.slice(0, 1)}
-                        </div>
-                        <span className="text-zinc-100 font-medium">
-                          {token.symbol}
-                        </span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Amount Input - Only shown after token is selected */}
-              {selectedToken && (
-                <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
-                  <div>
-                    <div className="relative">
-                      <Input
-                        type="number"
-                        placeholder={`Enter ${selectedToken} amount`}
-                        value={investmentAmount}
-                        onChange={(e) => setInvestmentAmount(e.target.value)}
-                        className="pl-10 bg-zinc-900/50 border-zinc-700/50 text-zinc-100 placeholder:text-zinc-500"
-                      />
-                      <div className="absolute left-3 top-1/2 -translate-y-1/2">
-                        <div
-                          className={`w-4 h-4 rounded-full bg-gradient-to-r ${
-                            selectedToken === "ETH"
-                              ? "from-blue-500 to-blue-600"
-                              : selectedToken === "USDC"
-                              ? "from-blue-400 to-cyan-500"
-                              : selectedToken === "STRK"
-                              ? "from-purple-500 to-purple-600"
-                              : "from-green-500 to-teal-500"
-                          } flex items-center justify-center text-white font-semibold text-[10px]`}
-                        >
-                          {selectedToken?.slice(0, 1)}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {investmentAmount && parseFloat(investmentAmount) > 0 && (
-                    <div className="space-y-4">
-                      <div className="p-4 rounded-lg bg-zinc-900/50 space-y-3">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-zinc-400">
-                            Expected Monthly Returns
-                          </span>
-                          <span className="text-teal-400">
-                            {formatCurrency(returns.monthly)}
-                          </span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-zinc-400">
-                            Expected Annual Returns
-                          </span>
-                          <span className="text-teal-400">
-                            {formatCurrency(returns.annual)}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </CardContent>
-            <CardFooter>
-              <Button
-                onClick={handleInvest}
-                disabled={
-                  !selectedToken ||
-                  !investmentAmount ||
-                  parseFloat(investmentAmount) <= 0 ||
-                  isLoading
-                }
-                className={`w-full bg-gradient-to-r ${vault.gradient} text-white hover:opacity-90 transition-opacity`}
-              >
-                {isLoading ? (
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-zinc-100/30 border-t-zinc-100 rounded-full animate-spin" />
-                    Processing...
-                  </div>
-                ) : (
-                  `Invest with ${selectedToken || "Token"}`
-                )}
-              </Button>
-            </CardFooter>
-          </Card>
+          <TokenSection vault={vault} onInvest={handleInvest} />
 
           {/* Vault Security */}
           <Card className="bg-zinc-800/50 border-zinc-700/50">
