@@ -3,7 +3,7 @@
 pub mod MockERC20 {
     use starknet::{ContractAddress};
     use openzeppelin::token::erc20::{ERC20Component, ERC20HooksEmptyImpl};
-    use cairo::interfaces::iERC20::{IERC20Token, IERC20TokenCamel};
+    use cairo::interfaces::IERC20::{IERC20Token, IERC20TokenCamel};
 
     component!(path: ERC20Component, storage: erc20, event: ERC20Event);
 

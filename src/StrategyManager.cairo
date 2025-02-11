@@ -11,7 +11,8 @@ pub mod StrategyManager {
         security::reentrancyguard::ReentrancyGuardComponent, security::pausable::PausableComponent,
         upgrades::upgradeable::UpgradeableComponent, introspection::src5::SRC5Component,
     };
-    use cairo::interfaces::iERC20::{IERC20Dispatcher, IERC20DispatcherTrait};
+    use cairo::interfaces::IERC20::{IERC20Dispatcher, IERC20DispatcherTrait};
+    use cairo::interfaces::iJediswapRouter::{IJediswapRouterDispatcher , IJediswapRouterDispatcherTrait};
     use starknet::storage::{Map, StorageMapReadAccess, StorageMapWriteAccess};
     use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess};
     use starknet::syscalls::call_contract_syscall;
@@ -55,12 +56,9 @@ pub mod StrategyManager {
         next_pool_id: felt252,
         jediswap_router: ContractAddress,
 
-
-
-
-         // Serialization approach storage
-         deposited_info_data: Map<(felt252, u32), felt252>,  // (deposit_id, index) -> serialized data
-         deposited_info_length: Map<felt252, u32>,  // deposit_id -> length of serialized data
+        // Serialization approach storage
+        deposited_info_data: Map<(felt252, u32), felt252>,  // (deposit_id, index) -> serialized data
+        deposited_info_length: Map<felt252, u32>,  // deposit_id -> length of serialized data
     }
     #[event]
     #[derive(Drop, starknet::Event)]
@@ -368,14 +366,19 @@ pub mod StrategyManager {
             erc20_dispatcher.approve(router_address, amount_in);
 
             // change this to use the above.
-            // let router = self._get_jedi_router();
-            // let amounts = router
-            //     .swap_exact_tokens_for_tokens(amount_in, 0, path, contract_address, deadline);
-            // return (*amounts.at(amounts.len() - 1));
-            return 56;
+            let router = self._get_jedi_router();
+            let amounts = router
+                .swap_exact_tokens_for_tokens(amount_in, 0, path, contract_address, deadline);
+            return (*amounts.at(amounts.len() - 1));
+        }
+
+        fn _get_jedi_router(self: @ContractState)->IJediswapRouterDispatcher{
+            let jediswap_router = IJediswapRouterDispatcher{contract_address: self.jediswap_router.read()};
+            jediswap_router
         }
 
     }
+
 
 
     #[generate_trait]

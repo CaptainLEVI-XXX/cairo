@@ -11,7 +11,7 @@ pub mod PoolManager {
         security::reentrancyguard::ReentrancyGuardComponent, security::pausable::PausableComponent,
         upgrades::upgradeable::UpgradeableComponent, introspection::src5::SRC5Component,
     };
-    use cairo::interfaces::iERC20::{IERC20Dispatcher, IERC20DispatcherTrait};
+    use cairo::interfaces::IERC20::{IERC20Dispatcher, IERC20DispatcherTrait};
 
 
     use starknet::storage::{Map, StorageMapReadAccess, StorageMapWriteAccess};

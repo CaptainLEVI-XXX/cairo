@@ -1,7 +1,7 @@
 use starknet::{ContractAddress, ClassHash};
 
 #[starknet::interface]
-pub trait IZkLendIntegration<TContractState> {
+pub trait IZKLendIntegration<TContractState> {
     fn deposit_zklend(
         ref self: TContractState, asset: ContractAddress, amount: u256
     ) -> (u256, ContractAddress, u256);
