@@ -9,7 +9,7 @@ pub struct StrategyInfo {
     pub is_registered: bool,
 }
 
-#[derive(Clone,Drop, Serde)]
+#[derive(Clone, Drop, Serde)]
 pub struct DepositedInfo {
     pub amount: u256,
     pub asset: ContractAddress,
@@ -47,13 +47,15 @@ pub trait IStrategyManager<TContractState> {
 
     // Request funds from pool
     fn request_funds_from_pool(
-        ref self: TContractState,
-        pool_id: felt252,
-        strategy_id: felt252,
-        assets_to: ContractAddress
+        ref self: TContractState, pool_id: felt252, strategy_id: felt252, assets_to: ContractAddress
     ) -> DepositedInfo;
 
     // View functions
     fn get_strategy(self: @TContractState, strategy_id: felt252) -> StrategyInfo;
     fn get_total_strategies(self: @TContractState) -> u256;
+    fn get_pool(self: @TContractState, pool_id: felt252) -> ContractAddress;
+    fn get_total_pools(self: @TContractState) -> felt252;
+    fn get_deposit_info(self: @TContractState, deposit_id: felt252) -> DepositedInfo;
+    fn get_total_deposits(self: @TContractState) -> felt252;
+    fn update_jediswap_router(ref self: TContractState, new_router: ContractAddress);
 }

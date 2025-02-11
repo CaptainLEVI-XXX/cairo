@@ -9,7 +9,7 @@ pub mod interfaces {
     pub mod iZKLend;
 }
 
-pub mod integrations{
+pub mod integrations {
     pub mod ekubo;
     pub mod hashstack;
     pub mod jediswap;

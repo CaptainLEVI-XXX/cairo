@@ -1,6 +1,8 @@
 #[starknet::contract]
 pub mod ZKLendIntegration {
-    use starknet::{get_contract_address, get_caller_address, get_block_timestamp, ContractAddress, ClassHash};
+    use starknet::{
+        get_contract_address, get_caller_address, get_block_timestamp, ContractAddress, ClassHash
+    };
     use core::traits::Into;
     use core::num::traits::Zero;
     use cairo::interfaces::IERC20::{IERC20Dispatcher, IERC20DispatcherTrait};
@@ -89,7 +91,7 @@ pub mod ZKLendIntegration {
         assert(!owner_.is_zero(), Errors::ZERO_ADDRESS);
         assert(!strategy_manager_.is_zero(), Errors::ZERO_ADDRESS);
         assert(!zklend_router_.is_zero(), Errors::ZERO_ADDRESS);
-        
+
         self.owner.write(owner_);
         self.strategy_manager.write(strategy_manager_);
         self.zklend_router.write(zklend_router_);
@@ -104,9 +106,7 @@ pub mod ZKLendIntegration {
         }
 
         fn deposit_zklend(
-            ref self: ContractState,
-            asset: ContractAddress,
-            amount: u256
+            ref self: ContractState, asset: ContractAddress, amount: u256
         ) -> (u256, ContractAddress, u256) {
             // Access control
             self._assert_only_strategy_manager();
@@ -116,28 +116,19 @@ pub mod ZKLendIntegration {
 
             // Create spend info
             let zk_lend_params = ZkLendSpend {
-                asset,
-                amount,
-                timestamp: get_block_timestamp().try_into().unwrap()
+                asset, amount, timestamp: get_block_timestamp().try_into().unwrap()
             };
 
             // Perform deposit
             let scaled_amount = self._zk_deposit(asset, amount);
-            
+
             // Update storage
             let spend_id = self.spend_id.read() + 1;
             self.spend_info.write(spend_id, zk_lend_params);
             self.spend_id.write(spend_id);
 
             // Emit event
-            self.emit(Event::Deposited(
-                Deposited {
-                    asset,
-                    amount,
-                    scaled_amount,
-                    spend_id
-                }
-            ));
+            self.emit(Event::Deposited(Deposited { asset, amount, scaled_amount, spend_id }));
 
             (scaled_amount, asset, spend_id)
         }
@@ -145,29 +136,29 @@ pub mod ZKLendIntegration {
         fn withdraw_zklend(ref self: ContractState, id: u256) -> u256 {
             // Access control
             self._assert_only_strategy_manager();
-            
+
             // Get spend info
             let spend_info = self.spend_info.read(id);
             assert(!spend_info.asset.is_zero(), 'Invalid spend ID');
 
             // Calculate withdrawal amount
-            let scaled_up_balance = self._get_scaled_up_amount(
-                spend_info.asset,
-                spend_info.amount
-            );
+            let scaled_up_balance = self._get_scaled_up_amount(spend_info.asset, spend_info.amount);
 
             // Perform withdrawal
             let amount_out = self._zk_withdraw(spend_info.asset, scaled_up_balance);
 
             // Emit event
-            self.emit(Event::Withdrawn(
-                Withdrawn {
-                    asset: spend_info.asset,
-                    amount: amount_out,
-                    scaled_amount: scaled_up_balance,
-                    spend_id: id
-                }
-            ));
+            self
+                .emit(
+                    Event::Withdrawn(
+                        Withdrawn {
+                            asset: spend_info.asset,
+                            amount: amount_out,
+                            scaled_amount: scaled_up_balance,
+                            spend_id: id
+                        }
+                    )
+                );
 
             amount_out
         }
@@ -184,38 +175,29 @@ pub mod ZKLendIntegration {
         }
 
         fn _assert_only_strategy_manager(self: @ContractState) {
-            assert(
-                get_caller_address() == self.strategy_manager.read(),
-                Errors::INVALID_CALLER
-            );
+            assert(get_caller_address() == self.strategy_manager.read(), Errors::INVALID_CALLER);
         }
 
         fn _zk_deposit(
-            ref self: ContractState,
-            asset_from: ContractAddress,
-            amount_in: u256
+            ref self: ContractState, asset_from: ContractAddress, amount_in: u256
         ) -> u256 {
             let zklend_router = self.zklend_router.read();
             let zklend_dispatcher = IZKLendDispatcher { contract_address: zklend_router };
-            
+
             // First approve the transfer
             let erc20_dispatcher = IERC20Dispatcher { contract_address: asset_from };
             erc20_dispatcher.approve(zklend_router, amount_in);
 
             // Calculate scaled amount before deposit
             let scaled_down_amount = self._get_scaled_down_amount(asset_from, amount_in);
-            
+
             // Perform deposit
             zklend_dispatcher.deposit(asset_from, amount_in.try_into().unwrap());
 
             scaled_down_amount
         }
 
-        fn _zk_withdraw(
-            ref self: ContractState,
-            asset: ContractAddress,
-            amount_in: u256
-        ) -> u256 {
+        fn _zk_withdraw(ref self: ContractState, asset: ContractAddress, amount_in: u256) -> u256 {
             let contract_address = get_contract_address();
             let erc20_dispatcher = IERC20Dispatcher { contract_address: asset };
             let zklend_dispatcher = IZKLendDispatcher {
@@ -231,14 +213,12 @@ pub mod ZKLendIntegration {
             // Calculate actual withdrawn amount
             let final_balance = erc20_dispatcher.balance_of(contract_address);
             assert(final_balance >= initial_balance, 'Invalid withdrawal');
-            
+
             final_balance - initial_balance
         }
 
         fn _get_scaled_up_amount(
-            self: @ContractState,
-            asset: ContractAddress,
-            raw_amount: u256
+            self: @ContractState, asset: ContractAddress, raw_amount: u256
         ) -> u256 {
             let zklend_dispatcher = IZKLendDispatcher {
                 contract_address: self.zklend_router.read()
@@ -248,9 +228,7 @@ pub mod ZKLendIntegration {
         }
 
         fn _get_scaled_down_amount(
-            self: @ContractState,
-            asset: ContractAddress,
-            amount: u256
+            self: @ContractState, asset: ContractAddress, amount: u256
         ) -> u256 {
             let zklend_dispatcher = IZKLendDispatcher {
                 contract_address: self.zklend_router.read()

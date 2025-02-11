@@ -1,6 +1,5 @@
 // use starknet::ContractAddress;
 
-
 // #[starknet::contract]
 // mod Jediswap {
 //     // Starknet imports
@@ -34,7 +33,7 @@
 //         ) -> SpendLoanResult {
 //             //// println!("swap_jedi_swap 1");
 //             swaps.assert_no_swaps();
-//             let dest_address = to_token; // 
+//             let dest_address = to_token; //
 //             let router = self._get_jedi_router();
 
 //             let current_amount: felt252 = amount.try_into().unwrap();
@@ -61,7 +60,6 @@
 
 //             return (spend_loan_result);
 //         }
-
 
 //         fn add_liquidity_jediswap(
 //             ref self: ContractState, spend_params: SpendParams, swaps: Array<SwapInfo>
@@ -113,8 +111,8 @@
 
 //         /// @notice Reverts the utilised loan, from secondary market to original loan market
 //         /// @param loan_id The id of the utilised loan
-//         /// @return revert_loan_result Returns the struct type RevertLoanResult, containing loan_id,
-//         /// returned_market and returned amount
+//         /// @return revert_loan_result Returns the struct type RevertLoanResult, containing
+//         loan_id, /// returned_market and returned amount
 //         fn revert_swap_jedi_swap(
 //             ref self: ContractState, revert_params: RevertSpendParams, swaps: Array<SwapInfo>
 //         ) -> RevertLoanResult {
@@ -233,7 +231,6 @@
 //                 )
 //         }
 //     }
-
 
 //     #[generate_trait]
 //     impl InternalImpl of InternalTrait {
