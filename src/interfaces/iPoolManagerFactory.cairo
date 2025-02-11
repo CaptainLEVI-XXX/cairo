@@ -1,7 +1,4 @@
-use starknet::{
-    ClassHash,
-    ContractAddress
-};
+use starknet::{ClassHash, ContractAddress};
 
 #[starknet::interface]
 pub trait IPoolManagerFactory<TContractState> {
@@ -19,6 +16,6 @@ pub trait IPoolManagerFactory<TContractState> {
         constructor_calldata: Array<felt252>
     ) -> ContractAddress;
 
-    
+
     fn get_deployment_count(self: @TContractState) -> u256;
 }

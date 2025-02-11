@@ -320,9 +320,11 @@ pub trait IPoolManager<TContractState> {
     /// - The balance of the token (`u256`).
     fn balance_of(self: @TContractState, owner: ContractAddress, id: felt252) -> u256;
 
-    fn pause(ref self:TContractState);
-    fn unpause(ref self:TContractState);
-    fn transfer_assets_to_strategy(ref self:TContractState,requested_address:ContractAddress);
+    fn pause(ref self: TContractState);
+    fn unpause(ref self: TContractState);
+    fn transfer_assets_to_strategy(
+        ref self: TContractState, requested_address: ContractAddress
+    ) -> (Array<u256>, Array<ContractAddress>);
 }
 
 /// Struct representing metadata for a token managed by the Pool Manager.
@@ -342,3 +344,4 @@ pub struct TokenMetadata {
     pub underlying_asset: ContractAddress,
     pub is_registered: bool,
 }
+

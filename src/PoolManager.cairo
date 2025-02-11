@@ -1,20 +1,18 @@
-
 #[starknet::contract]
 pub mod PoolManager {
     use starknet::event::EventEmitter;
     use cairo::interfaces::iPoolManager::{IPoolManager, TokenMetadata};
-    use core::traits::{Into,TryInto};
+    use core::traits::{Into, TryInto};
     use core::num::traits::Zero;
     use starknet::{
         get_caller_address, ContractAddress, ClassHash, contract_address_const, get_contract_address
     };
     use openzeppelin::{
-        security::reentrancyguard::ReentrancyGuardComponent,
-        security::pausable::PausableComponent,
+        security::reentrancyguard::ReentrancyGuardComponent, security::pausable::PausableComponent,
         upgrades::upgradeable::UpgradeableComponent, introspection::src5::SRC5Component,
     };
     use cairo::interfaces::iERC20::{IERC20Dispatcher, IERC20DispatcherTrait};
- 
+
 
     use starknet::storage::{Map, StorageMapReadAccess, StorageMapWriteAccess};
     use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess};
@@ -520,59 +518,68 @@ pub mod PoolManager {
             self.balance_of.read((owner, id))
         }
 
-        fn pause(ref self : ContractState){
+        fn pause(ref self: ContractState) {
             self._assert_owner();
             self.pausable.pause();
         }
 
-        fn unpause(ref self : ContractState){
+        fn unpause(ref self: ContractState) {
             self._assert_owner();
             self.pausable.unpause();
         }
 
-        fn transfer_assets_to_strategy(ref self: ContractState,requested_address:ContractAddress){
-            self._assert_owner();  // replace this strategy address
+        fn transfer_assets_to_strategy(
+            ref self: ContractState, requested_address: ContractAddress
+        ) -> (Array<u256>, Array<ContractAddress>) {
+            self._assert_owner(); // replace this strategy address
             self.pausable.assert_not_paused();
             self.reentrancyguard.start();
-        
-            let total_tokens:u8 = self.next_tokenId.read().try_into().unwrap();
-        
+
+            let total_tokens: u8 = self.next_tokenId.read().try_into().unwrap();
+            let mut amounts: Array<u256> = array![];
+            let mut assets: Array<ContractAddress> = array![];
+
             // Loop through all token IDs (starting from 1 since 0 is not used)
             let mut current_id: u8 = 1;
             loop {
                 if current_id > total_tokens {
                     break;
                 }
-        
+
                 // Get the underlying asset address for this token ID
-                let asset_address:ContractAddress = self.tokenId_to_asset.read(current_id.try_into().unwrap());
-                
+                let asset_address: ContractAddress = self
+                    .tokenId_to_asset
+                    .read(current_id.try_into().unwrap());
+
                 // Skip if no asset registered for this ID
                 if asset_address.is_zero() {
                     current_id += 1;
                     continue;
                 }
-        
+
                 let erc20_dispatcher = IERC20Dispatcher { contract_address: asset_address };
-                
+
                 // Get total assets in vault for this token
                 let vault_balance = erc20_dispatcher.balance_of(get_contract_address());
-                
+
                 // Calculate 80% of balance (using basis points: 8000 = 80%)
                 let transfer_amount = (vault_balance * 8000_u256) / 10000_u256;
-                
+
                 // Only transfer if there's a non-zero amount
                 if !transfer_amount.is_zero() {
+                    amounts.append(transfer_amount);
+                    assets.append(asset_address);
                     // Transfer 80% to strategy
                     erc20_dispatcher.transfer(requested_address, transfer_amount);
                 }
-        
+
                 current_id += 1;
             };
-        
-            self.reentrancyguard.end();
-        }   
 
+            self.reentrancyguard.end();
+
+            (amounts, assets)
+        }
     }
 
 

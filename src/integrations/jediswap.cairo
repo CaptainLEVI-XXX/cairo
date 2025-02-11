@@ -12,31 +12,29 @@ mod Jediswap {
 
     // // External imports
 
-
-
     #[storage]
-    struct Storage {
-        
-    }
+    struct Storage {}
 
     #[event]
     #[derive(Drop, starknet::Event)]
-    enum Event {
+    enum Event {}
 
-    }
-    
     #[abi(embed_v0)]
     impl JediswapImpl of IJediswapIntegration<ContractState> {
         /// @notice Function to utilise open loans through jediswap
         /// @param loan_id Id of the existing loan
         /// @param dest_address Secondary market address to swap to
-        /// @return spend_loan_result Returns the struct of type SpendLoanResult, containing loan_id, dest_address, and returned_amount
+        /// @return spend_loan_result Returns the struct of type SpendLoanResult, containing
+        /// loan_id, dest_address, and returned_amount
         fn swap_jedi_swap(
-            ref self: ContractState, from_token:ContractAddress,to_token:ContractAddress,amount:u256
+            ref self: ContractState,
+            from_token: ContractAddress,
+            to_token: ContractAddress,
+            amount: u256
         ) -> SpendLoanResult {
             //// println!("swap_jedi_swap 1");
             swaps.assert_no_swaps();
-            let dest_address = to_token;  // 
+            let dest_address = to_token; // 
             let router = self._get_jedi_router();
 
             let current_amount: felt252 = amount.try_into().unwrap();
@@ -45,9 +43,7 @@ mod Jediswap {
             //// println!("swap_jedi_swap 3 addr: {}", current_market);
 
             let amount_out: u256 = self
-                ._jedi_swap(
-                    from_token, to_token, amount, router.contract_address
-                );
+                ._jedi_swap(from_token, to_token, amount, router.contract_address);
             //// println!("swap_jedi_swap 4");
 
             // settle and transfer funds back to dToken
@@ -97,7 +93,7 @@ mod Jediswap {
             //// println!("add_liquidity_jediswap 5");
             // TODO Assert residual tokens < 0.1%
 
-            // get LP token address            
+            // get LP token address
             let factory = router.factory();
             let jediswapFactory_dispatcher = IJediSwapFactoryDispatcher {
                 contract_address: factory
@@ -117,7 +113,8 @@ mod Jediswap {
 
         /// @notice Reverts the utilised loan, from secondary market to original loan market
         /// @param loan_id The id of the utilised loan
-        /// @return revert_loan_result Returns the struct type RevertLoanResult, containing loan_id, returned_market and returned amount
+        /// @return revert_loan_result Returns the struct type RevertLoanResult, containing loan_id,
+        /// returned_market and returned amount
         fn revert_swap_jedi_swap(
             ref self: ContractState, revert_params: RevertSpendParams, swaps: Array<SwapInfo>
         ) -> RevertLoanResult {
@@ -265,7 +262,9 @@ mod Jediswap {
             path.append(asset_from);
             path.append(asset_to);
 
-            let erc20_dispatcher :IERC20Dispatcher = IERC20Dispatcher{contract_address :asset_from };
+            let erc20_dispatcher: IERC20Dispatcher = IERC20Dispatcher {
+                contract_address: asset_from
+            };
 
             erc20_dispatcher.approve(routerAddr, amount_in);
 

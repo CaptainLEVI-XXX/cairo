@@ -20,7 +20,6 @@ fn deploy_mock_token() -> ContractAddress {
 
 // Helper function to deploy PoolManager and setup initial state
 fn setup() -> (ContractAddress, ContractAddress) {
-
     println!("Im here Pool Maager token");
     let pool_manager_class = declare("PoolManager").unwrap().contract_class();
     let admin: ContractAddress = contract_address_const::<1>();
@@ -38,8 +37,7 @@ fn setup() -> (ContractAddress, ContractAddress) {
 
     // Mint some tokens for testing
     let amount: u256 = 1000;
-    IERC20Dispatcher { contract_address: token_address }
-        .permissioned_mint(admin, amount);
+    IERC20Dispatcher { contract_address: token_address }.permissioned_mint(admin, amount);
 
     (pool_manager_address, token_address)
 }
@@ -56,14 +54,14 @@ fn test_register_asset() {
     // Using single-character strings to ensure they fit in felt252
     let name: felt252 = 'mETH';
     let symbol: felt252 = 'mETH';
-    
+
     let token_id = pool_manager.register_asset(token_address, name, symbol);
-    
+
     assert(token_id == 1, 'Invalid token ID');
     assert(pool_manager.asset(token_id) == token_address, 'Invalid asset address');
     assert(pool_manager.name(token_id) == name, 'Invalid name');
     assert(pool_manager.symbol(token_id) == symbol, 'Invalid symbol');
-    
+
     stop_cheat_caller_address(pool_manager_address);
 }
 
@@ -82,7 +80,7 @@ fn test_deposit_and_withdraw() {
     // Setup token approvals and transfers
     let deposit_amount: u256 = 100000000000000000000; // 100 tokens
     let token = IERC20Dispatcher { contract_address: token_address };
-    
+
     // Transfer some tokens to user
     start_cheat_caller_address(token_address, admin);
     token.transfer(user, deposit_amount);
@@ -91,19 +89,22 @@ fn test_deposit_and_withdraw() {
     // Approve pool manager to spend tokens
     start_cheat_caller_address(token_address, user);
     token.approve(pool_manager_address, deposit_amount);
-    
+
     // Test deposit
     let shares = pool_manager.deposit(token_id, deposit_amount, user);
     assert(shares == deposit_amount, 'Invalid shares received');
     assert(pool_manager.balance_of(user, token_id) == shares, 'Invalid balance after deposit');
-    
+
     // Test withdraw
     let withdraw_amount = deposit_amount / 2;
     let shares_to_burn = pool_manager.withdraw(token_id, withdraw_amount, user, user);
-    
-    assert(pool_manager.balance_of(user, token_id) == deposit_amount - shares_to_burn, 'Invalid balance after withdraw');
+
+    assert(
+        pool_manager.balance_of(user, token_id) == deposit_amount - shares_to_burn,
+        'Invalid balance after withdraw'
+    );
     assert(token.balance_of(user) == withdraw_amount, 'Invalid token balance after withdraw');
-    
+
     stop_cheat_caller_address(token_address);
 }
 
@@ -119,7 +120,7 @@ fn test_preview_deposit_and_withdraw() {
     stop_cheat_caller_address(pool_manager_address);
 
     let deposit_amount: u256 = 100000000000000000000; // 100 tokens
-    
+
     // Test preview deposit
     let expected_shares = pool_manager.preview_deposit(token_id, deposit_amount);
     assert(expected_shares == deposit_amount, 'Invalid preview deposit amount');
