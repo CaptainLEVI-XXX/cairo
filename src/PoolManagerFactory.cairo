@@ -7,7 +7,6 @@ pub mod PoolManagerFactory {
 
     #[storage]
     struct Storage {
-        pool_manager_class_hash: ClassHash,
         deployment_count: u256
     }
 
@@ -20,8 +19,14 @@ pub mod PoolManagerFactory {
             ref self: ContractState,
             salt: felt252,
             class_hash: ClassHash,
-            constructor_calldata: Array<felt252>
+            owner:ContractAddress,
+            strategy_manager:ContractAddress
+        
         ) -> ContractAddress {
+
+            let mut constructor_calldata: Array<felt252> = array![];
+            constructor_calldata.append(owner.into());
+            constructor_calldata.append(strategy_manager.into());
             // Deploy the contract
             let (contract_address, _) = starknet::syscalls::deploy_syscall(
                 class_hash, salt, constructor_calldata.span(), false

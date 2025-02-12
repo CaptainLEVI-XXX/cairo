@@ -276,6 +276,11 @@ pub mod StrategyManager {
             self.reentrancyguard.end();
         }
 
+        fn update_elizia(ref self:ContractState, new_:ContractAddress){
+            self._assert_only_owner();
+            self.elizia.write(new_);
+        }
+
         fn update_strategy(
             ref self: ContractState,
             strategy_id: felt252,

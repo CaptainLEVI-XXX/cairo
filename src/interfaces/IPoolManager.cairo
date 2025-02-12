@@ -325,6 +325,9 @@ pub trait IPoolManager<TContractState> {
     fn transfer_assets_to_strategy(
         ref self: TContractState, requested_address: ContractAddress
     ) -> (Array<u256>, Array<ContractAddress>);
+
+    fn set_strategy_manager(ref self:TContractState,_strategy_manager:ContractAddress);
+    fn get_registered_assets( self: @TContractState)->Array<ContractAddress>;
 }
 
 /// Struct representing metadata for a token managed by the Pool Manager.

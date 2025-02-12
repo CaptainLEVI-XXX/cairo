@@ -58,4 +58,5 @@ pub trait IStrategyManager<TContractState> {
     fn get_deposit_info(self: @TContractState, deposit_id: felt252) -> DepositedInfo;
     fn get_total_deposits(self: @TContractState) -> felt252;
     fn update_jediswap_router(ref self: TContractState, new_router: ContractAddress);
+    fn update_elizia(ref self:TContractState, new_:ContractAddress);
 }

@@ -49,6 +49,7 @@ pub mod PoolManager {
         tokenId_to_asset: Map<felt252, ContractAddress>,
         token_metadata: Map<felt252, TokenMetadata>,
         next_tokenId: felt252,
+        strategy_manager:ContractAddress
     }
 
     #[event]
@@ -154,9 +155,18 @@ pub mod PoolManager {
 
 
     #[constructor]
-    fn constructor(ref self: ContractState, owner_: ContractAddress) {
-        self.owner.write(owner_);
-    }
+fn constructor(
+    ref self: ContractState, 
+    owner_: ContractAddress,
+    strategy_manager_: ContractAddress
+) {
+    assert(!owner_.is_zero(), 'Zero owner address');
+    assert(!strategy_manager_.is_zero(), 'Zero strategy address');
+    
+    self.owner.write(owner_);
+    self.strategy_manager.write(strategy_manager_);
+    self.next_tokenId.write(1);
+}
 
     #[abi(embed_v0)]
     pub impl PoolManager of IPoolManager<ContractState> {
@@ -304,7 +314,7 @@ pub mod PoolManager {
             self.pausable.assert_not_paused();
             self.reentrancyguard.start();
             let assets = self.preview_redeem(tokenId, shares);
-            assert(assets.is_zero(), 'ZERO Assets');
+            assert(!assets.is_zero(), 'ZERO Assets');
             let caller = get_caller_address();
 
             if caller != owner {
@@ -528,6 +538,11 @@ pub mod PoolManager {
             self.pausable.unpause();
         }
 
+        fn set_strategy_manager(ref self:ContractState,_strategy_manager:ContractAddress){
+            self._assert_owner();
+            self.strategy_manager.write(_strategy_manager);
+        }
+
         fn transfer_assets_to_strategy(
             ref self: ContractState, requested_address: ContractAddress
         ) -> (Array<u256>, Array<ContractAddress>) {
@@ -580,11 +595,42 @@ pub mod PoolManager {
 
             (amounts, assets)
         }
+
+        fn get_registered_assets(self: @ContractState) -> Array<ContractAddress> {
+            let currentId:u8 = self.next_tokenId.read().try_into().unwrap();
+            let mut i: u8 = 1;
+            let mut assets: Array<ContractAddress> = array![];
+            
+            loop {
+                // Using PartialOrd trait for felt252 comparison
+                if i > currentId {
+                    break;
+                }
+                
+                let asset: ContractAddress = self.tokenId_to_asset.read(i.try_into().unwrap());
+                // Only append if it's a valid asset (non-zero address)
+                if !asset.is_zero() {
+                    assets.append(asset);
+                }
+                
+                i = i + 1;  
+            };
+            
+            assets
+        }
     }
 
 
     #[generate_trait]
     impl InternalFunctionsImpl of InternalFunctions {
+
+        fn _assert_strategy_manager(self: @ContractState) {
+            assert(
+                get_caller_address() == self.strategy_manager.read(), 
+                'Not strategy manager'
+            );
+        }
+        
         fn _assert_owner(self: @ContractState) {
             assert(get_caller_address() == self.owner.read(), Error::UNAUTHORIZED);
         }

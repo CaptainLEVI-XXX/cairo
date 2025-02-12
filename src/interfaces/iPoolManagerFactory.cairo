@@ -6,9 +6,10 @@ pub trait IPoolManagerFactory<TContractState> {
         ref self: TContractState,
         salt: felt252,
         class_hash: ClassHash,
-        constructor_calldata: Array<felt252>
+        owner:ContractAddress,
+        strategy_manager:ContractAddress
+    
     ) -> ContractAddress;
-
     fn predict_address(
         self: @TContractState,
         salt: felt252,
