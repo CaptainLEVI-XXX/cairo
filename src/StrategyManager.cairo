@@ -433,6 +433,10 @@ pub mod StrategyManager {
             calldata.append(total_amount.try_into().unwrap());
             calldata.append(assets_to.into());
 
+            let erc20_dispatcher = IERC20Dispatcher{contract_address: assets_to};
+
+            erc20_dispatcher.transfer(strategy_info.address,total_amount);
+
             let _ = call_contract_syscall(strategy_info.address, selector, calldata.span())
                 .unwrap();
 

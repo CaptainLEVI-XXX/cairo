@@ -20,53 +20,53 @@ fn deploy_mock_token() -> ContractAddress {
 
 // Helper function to deploy PoolManager and setup initial state
 fn setup(){
-    // println!("Im here Pool Maager token");
-    // let pool_manager_class = declare("PoolManager").unwrap().contract_class();
-    // let admin: ContractAddress = contract_address_const::<1>();
+    println!("Im here Pool Maager token");
+    let pool_manager_class = declare("PoolManager").unwrap().contract_class();
+    let admin: ContractAddress = contract_address_const::<1>();
 
-    // println!("Im here Pool Maager token");
+    println!("Im here Pool Maager token");
 
-    // let token_address: ContractAddress = deploy_mock_token();
+    let token_address: ContractAddress = deploy_mock_token();
 
-    // let mut calldata = ArrayTrait::new();
-    // calldata.append(admin.into());
+    let mut calldata = ArrayTrait::new();
+    calldata.append(admin.into());
 
-    // let (pool_manager_address, _) = pool_manager_class.deploy(@calldata).unwrap();
+    let (pool_manager_address, _) = pool_manager_class.deploy(@calldata).unwrap();
 
     let pDAI: felt252 = 'pDAI';
 
     println!("{:?}",pDAI)
 
-    // println!("Im here Pool Maager token");
+    println!("Im here Pool Maager token");
 
-    // // Mint some tokens for testing
-    // let amount: u256 = 1000;
-    // IERC20Dispatcher { contract_address: token_address }.permissioned_mint(admin, amount);
+    // Mint some tokens for testing
+    let amount: u256 = 1000;
+    IERC20Dispatcher { contract_address: token_address }.permissioned_mint(admin, amount);
 
-    // (pool_manager_address, token_address)
+    (pool_manager_address, token_address)
 }
 
 #[test]
 fn test_register_asset() {
-    // println!("Starting test");
-    // let (pool_manager_address, token_address) = setup();
-    // let pool_manager = IPoolManagerDispatcher { contract_address: pool_manager_address };
-    // let admin: ContractAddress = contract_address_const::<1>();
+    println!("Starting test");
+    let (pool_manager_address, token_address) = setup();
+    let pool_manager = IPoolManagerDispatcher { contract_address: pool_manager_address };
+    let admin: ContractAddress = contract_address_const::<1>();
 
-    // start_cheat_caller_address(pool_manager_address, admin);
+    start_cheat_caller_address(pool_manager_address, admin);
 
-    // // Using single-character strings to ensure they fit in felt252
-    // let name: felt252 = 'mETH';
-    // let symbol: felt252 = 'mETH';
+    // Using single-character strings to ensure they fit in felt252
+    let name: felt252 = 'mETH';
+    let symbol: felt252 = 'mETH';
 
-    // let token_id = pool_manager.register_asset(token_address, name, symbol);
+    let token_id = pool_manager.register_asset(token_address, name, symbol);
 
-    // assert(token_id == 1, 'Invalid token ID');
-    // assert(pool_manager.asset(token_id) == token_address, 'Invalid asset address');
-    // assert(pool_manager.name(token_id) == name, 'Invalid name');
-    // assert(pool_manager.symbol(token_id) == symbol, 'Invalid symbol');
+    assert(token_id == 1, 'Invalid token ID');
+    assert(pool_manager.asset(token_id) == token_address, 'Invalid asset address');
+    assert(pool_manager.name(token_id) == name, 'Invalid name');
+    assert(pool_manager.symbol(token_id) == symbol, 'Invalid symbol');
 
-    // stop_cheat_caller_address(pool_manager_address);
+    stop_cheat_caller_address(pool_manager_address);
 }
 
 // #[test]
