@@ -33,7 +33,7 @@ pub mod MockERC20 {
     }
 
     #[abi(embed_v0)]
-    impl HashTokenImpl of IERC20Token<ContractState> {
+    impl TokenImpl of IERC20Token<ContractState> {
         fn permissioned_mint(ref self: ContractState, account: ContractAddress, amount: u256) {
             self.erc20.mint(account, amount);
         }
@@ -43,12 +43,12 @@ pub mod MockERC20 {
     }
 
     #[abi(embed_v0)]
-    impl HashTokenCamelImpl of IERC20TokenCamel<ContractState> {
+    impl TokenCamelImpl of IERC20TokenCamel<ContractState> {
         fn permissionedMint(ref self: ContractState, account: ContractAddress, amount: u256) {
-            HashTokenImpl::permissioned_mint(ref self, account, amount)
+            TokenImpl::permissioned_mint(ref self, account, amount)
         }
         fn permissionedBurn(ref self: ContractState, account: ContractAddress, amount: u256) {
-            HashTokenImpl::permissioned_burn(ref self, account, amount)
+            TokenImpl::permissioned_burn(ref self, account, amount)
         }
     }
 }

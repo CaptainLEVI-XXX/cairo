@@ -692,4 +692,3 @@ fn constructor(
         fn after_deposit(ref self: ContractState, token_id: felt252, assets: u256, shares: u256) {}
     }
 }
-
