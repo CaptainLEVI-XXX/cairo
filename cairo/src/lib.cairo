@@ -1,32 +1,24 @@
-/// Interface representing `HelloContract`.
-/// This interface allows modification and retrieval of the contract balance.
-#[starknet::interface]
-pub trait IHelloStarknet<TContractState> {
-    /// Increase contract balance.
-    fn increase_balance(ref self: TContractState, amount: felt252);
-    /// Retrieve contract balance.
-    fn get_balance(self: @TContractState) -> felt252;
+pub mod interfaces {
+    pub mod IERC20;
+    pub mod iTokenMetadata;
+    pub mod iPoolManager;
+    pub mod iPoolManagerFactory;
+    pub mod iStrategyManager;
+    pub mod iJediswapRouter;
+    pub mod iZKLendIntegration;
+    pub mod iZKLend;
 }
 
-/// Simple contract for managing balance.
-#[starknet::contract]
-mod HelloStarknet {
-    use core::starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess};
-
-    #[storage]
-    struct Storage {
-        balance: felt252,
-    }
-
-    #[abi(embed_v0)]
-    impl HelloStarknetImpl of super::IHelloStarknet<ContractState> {
-        fn increase_balance(ref self: ContractState, amount: felt252) {
-            assert(amount != 0, 'Amount cannot be 0');
-            self.balance.write(self.balance.read() + amount);
-        }
-
-        fn get_balance(self: @ContractState) -> felt252 {
-            self.balance.read()
-        }
-    }
+pub mod integrations {
+    pub mod ekubo;
+    pub mod hashstack;
+    pub mod jediswap;
+    pub mod starkfarm;
+    pub mod zkLend;
 }
+
+pub mod PoolManager;
+pub mod PoolManagerFactory;
+pub mod MockERC20;
+pub mod StrategyManager;
+
