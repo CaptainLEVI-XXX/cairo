@@ -1,4 +1,4 @@
-# DeFi Protocol Technical Documentation
+# Technical Documentation
 
 ## Overview
 This document outlines the technical architecture and implementation of DeFi protocol built for the Starknet blockchain. The protocol consists of two main components:
