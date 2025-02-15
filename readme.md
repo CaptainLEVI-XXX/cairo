@@ -1,7 +1,7 @@
 # DeFi Protocol Technical Documentation
 
 ## Overview
-This document outlines the technical architecture and implementation of a DeFi protocol built on the Starknet blockchain. The protocol consists of two main components:
+This document outlines the technical architecture and implementation of DeFi protocol built for the Starknet blockchain. The protocol consists of two main components:
 1. Pool Manager (ERC6909-compatible Vault)
 2. Strategy Manager (Automated Investment Controller)
 
@@ -53,36 +53,9 @@ The Strategy Manager coordinates with the Elizia AI agent to optimize yield gene
 2. JediSwap router converts tokens to target asset
 3. Consolidated funds are sent to selected strategy
 
-## Security Features
+## System Flow Diagram
 
-### Pool Manager
-- Reentrancy protection
-- Pausable functionality
-- Upgradeable design
-- Access control for admin functions
-- Share token allowance system
-
-### Strategy Manager
-- Elizia-only access for fund requests
-- Owner-restricted strategy management
-- Reentrancy guards
-- Deposit tracking and verification
-- Slippage protection in swaps
-
-## Integration Points
-
-### External Protocols
-- JediSwap: Used for token swaps and liquidity
-- Elizia AI: Strategy selection and timing
-- DeFi Strategies: Yield generation endpoints
-
-### Internal Interfaces
-- Pool Manager <-> Strategy Manager communication
-- Strategy execution through dynamic selectors
-- Event emission for tracking and monitoring
-
-
-
+```mermaid
 flowchart TB
     subgraph Users
         U1[User 1]
@@ -122,9 +95,12 @@ flowchart TB
     classDef external fill:#bbf,stroke:#333,stroke-width:2px
     class PoolManager,StrategyManager contract
     class EA,JS,S1,S2,S3 external
+```
 
+## Sequence Diagram
 
-    sequenceDiagram
+```mermaid
+sequenceDiagram
     participant User
     participant PM as Pool Manager
     participant SM as Strategy Manager
@@ -154,4 +130,32 @@ flowchart TB
     
     SM-->>EA: return DepositedInfo
     deactivate SM
+```
 
+## Security Features
+
+### Pool Manager
+- Reentrancy protection
+- Pausable functionality
+- Upgradeable design
+- Access control for admin functions
+- Share token allowance system
+
+### Strategy Manager
+- Elizia-only access for fund requests
+- Owner-restricted strategy management
+- Reentrancy guards
+- Deposit tracking and verification
+- Slippage protection in swaps
+
+## Integration Points
+
+### External Protocols
+- JediSwap: Used for token swaps and liquidity
+- Elizia AI: Strategy selection and timing
+- DeFi Strategies: Yield generation endpoints
+
+### Internal Interfaces
+- Pool Manager <-> Strategy Manager communication
+- Strategy execution through dynamic selectors
+- Event emission for tracking and monitoring
