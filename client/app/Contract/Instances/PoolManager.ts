@@ -1,55 +1,12 @@
 import { useContract } from "@starknet-react/core";
+import { PoolManagerABI } from "../ABI/PoolManager";
 
 const PoolManagerAddress =
-  "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
+  "0x054f62f7f853345475b81a698e4183a813acffa395e2ecb7bebe46c2dfb259da";
 
-const abi = [
-  {
-    members: [
-      {
-        name: "low",
-        type: "felt",
-      },
-      {
-        name: "high",
-        type: "felt",
-      },
-    ],
-    name: "Uint256",
-    type: "struct",
-  },
-  {
-    inputs: [
-      {
-        name: "name",
-        type: "felt",
-      },
-      {
-        name: "symbol",
-        type: "felt",
-      },
-      {
-        name: "recipient",
-        type: "felt",
-      },
-    ],
-    name: "constructor",
-    type: "constructor",
-  },
-  {
-    inputs: [],
-    name: "name",
-    outputs: [
-      {
-        type: "felt",
-      },
-    ],
-    state_mutability: "view",
-    type: "function",
-  },
-] as const;
-
-export function PoolManager() {
+// If you need just the contract, create a custom hook instead
+export function usePoolManager() {
+  const abi = PoolManagerABI;
   const { contract } = useContract({
     abi,
     address: PoolManagerAddress,
